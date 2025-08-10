@@ -5,7 +5,7 @@ import { Toolbar, Button, ClickButton, Ellipsis } from "./toolbar.js";
 import { ToolTypes } from "./cad_tools/tools.js";
 import { FilterByDropDownMenu } from "./cad_tools/ui.js";
 
-import template from "./index.html?raw";
+import template from "./index.html";
 
 function TEMPLATE(id) {
   const shift = KeyMapper.getshortcuts("shift");
