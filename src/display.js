@@ -345,8 +345,6 @@ class Display {
 
   dispose() {
     this.viewer = undefined;
-
-    this.cadTree.innerHTML = "";
     this.cadTree = undefined;
 
     this.cadView.removeChild(this.cadView.children[2]);
@@ -525,13 +523,6 @@ class Display {
    */
   getCanvas() {
     return this.cadView.children[this.cadView.children.length - 1];
-  }
-
-  /**
-   * Clear the Cad tree
-   */
-  clearCadTree() {
-    this.cadTree.innerHTML = "";
   }
 
   /**

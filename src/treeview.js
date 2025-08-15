@@ -74,7 +74,6 @@ class TreeView {
     this.container = document.createElement("ul");
     this.container.classList.add("tcv_toplevel");
 
-    // Unsubscribe other listeners, just in case
     this.scrollContainer.addEventListener("scroll", this.handleScroll);
 
     this.lastLabel = null;
@@ -242,7 +241,7 @@ class TreeView {
    * @param {Object} node - The node associated with the navigation marker.
    * @returns {Function} - The event handler function.
    */
-  handleNavigationClick = (node) => {
+  handleNavMarkerClick = (node) => {
     return (e) => {
       e.stopPropagation();
       node.expanded = !node.expanded;
@@ -255,26 +254,14 @@ class TreeView {
   };
 
   /**
-   * Handles the click event on an icon.
-   *
-   * @param {Node} node - The node associated with the icon.
-   * @param {string} s - The icon number 's'.
-   * @returns {Function} - The event handler function.
-   */
-  handleIconClick = (node, s) => {
-    return (e) => {
-      e.stopPropagation();
-      this.toggleIcon(node, s);
-    };
-  };
-
-  /**
    * Handles the click event on a label.
    *
    * @param {Node} node - The node that was clicked.
    * @returns {void}
    */
   handleLabelClick(node, e) {
+    e.stopPropagation();
+
     this.pickHandler(
       this.getNodePath(this.getParent(node)),
       node.name,
@@ -285,8 +272,6 @@ class TreeView {
       this.isLeaf(node) ? "leaf" : "node",
       true,
     );
-
-    console.log(`Label clicked: ${this.getNodePath(node)}`);
   }
 
   /**
@@ -345,12 +330,29 @@ class TreeView {
    *  Rendering routines
    ************************************************************************************/
 
+  clear() {
+    this.container.querySelectorAll(".tv-nav-marker").forEach((n) => {
+      n.onclick = undefined;
+    });
+
+    this.container.querySelectorAll(".tv-icon").forEach((n) => {
+      n.onclick = undefined;
+      n.onmousedown = undefined;
+    });
+
+    this.container.querySelectorAll(".tv-node-label").forEach((n) => {
+      n.onclick = undefined;
+    });
+
+    this.container.innerHTML = "";
+  }
+
   /**
    * Renders the tree view by clearing the container, rendering the placeholder,
    * and updating the tree.
    */
   render() {
-    this.container.innerHTML = "";
+    this.clear();
     this.renderPlaceholder(this.root, this.container);
     if (this.debug) {
       console.log("update => render");
@@ -409,7 +411,7 @@ class TreeView {
         : this.navIcons.right
       : "";
 
-    navMarker.onclick = this.handleNavigationClick(node);
+    navMarker.onclick = this.handleNavMarkerClick(node);
 
     nodeContent.dataset.state0 = node.state[0];
     nodeContent.dataset.state1 = node.state[1];
@@ -426,10 +428,11 @@ class TreeView {
       icon.className = className;
       icon.innerHTML = this.viewIcons[s][state];
       if (state !== States.disabled) {
-        icon.onmousedown = (e) => {
-          e.preventDefault();
+        icon.onmousedown = (e) => e.preventDefault();
+        icon.onclick = (e) => {
+          e.stopPropagation();
+          this.toggleIcon(node, s);
         };
-        icon.onclick = this.handleIconClick(node, s);
       }
       nodeContent.appendChild(icon);
     }
@@ -446,7 +449,6 @@ class TreeView {
     };
 
     label.onclick = (e) => {
-      e.stopPropagation();
       this.handleLabelClick(node, e);
     };
 
@@ -968,6 +970,10 @@ class TreeView {
     this.tree = null;
     this.navIcons = null;
     this.scrollContainer.removeEventListener("scroll", this.handleScroll);
+
+    this.clear();
+    this.container.parentElement.removeChild(this.container);
+    this.container = null;
   }
 }
 
