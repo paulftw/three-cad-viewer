@@ -924,8 +924,7 @@ class Viewer {
       deepDispose(this.clipping);
       this.clipping = null;
 
-      // clear tree view
-      this.display.clearCadTree();
+      this.treeview.clear();
 
       // clear info
       deepDispose(this.info);
@@ -1107,11 +1106,10 @@ class Viewer {
       false,
     );
 
-    this.display.clearCadTree();
-    const t = this.treeview.create();
+    const treeElement = this.treeview.create();
     timer.split("created tree");
 
-    this.display.addCadTree(t);
+    this.display.addCadTree(treeElement);
     this.treeview.render();
     timer.split("rendered tree");
     timer.stop();
