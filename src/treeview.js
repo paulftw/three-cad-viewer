@@ -235,33 +235,44 @@ class TreeView {
     this.update();
   };
 
+  getNodeForElement(domElement) {
+    return this.findNodeByPath(
+      domElement.closest(".tv-tree-node").dataset.path,
+    );
+  }
+
+  eventPreventDefault(e) {
+    e.preventDefault();
+  }
+
   /**
    * Handles the click event on a navigation node.
-   *
-   * @param {Object} node - The node associated with the navigation marker.
-   * @returns {Function} - The event handler function.
    */
-  handleNavMarkerClick = (node) => {
-    return (e) => {
-      e.stopPropagation();
-      node.expanded = !node.expanded;
-      this.showChildContainer(node);
-      if (this.debug) {
-        console.log("update => navClick");
-      }
-      this.update();
-    };
+  handleNavMarkerClick = (e) => {
+    e.stopPropagation();
+    const node = this.getNodeForElement(e.target);
+    node.expanded = !node.expanded;
+    this.showChildContainer(node);
+    if (this.debug) {
+      console.log("update => navClick");
+    }
+    this.update();
+  };
+
+  handleNodeIconClick = (e) => {
+    e.stopPropagation();
+    const node = this.getNodeForElement(e.target);
+    const s = parseInt(e.currentTarget.dataset.sValue);
+    console.log("node", node, s);
+    this.toggleIcon(node, s);
   };
 
   /**
    * Handles the click event on a label.
-   *
-   * @param {Node} node - The node that was clicked.
-   * @returns {void}
    */
-  handleLabelClick(node, e) {
+  handleNodeLabelClick = (e) => {
     e.stopPropagation();
-
+    const node = this.getNodeForElement(e.target);
     this.pickHandler(
       this.getNodePath(this.getParent(node)),
       node.name,
@@ -272,7 +283,7 @@ class TreeView {
       this.isLeaf(node) ? "leaf" : "node",
       true,
     );
-  }
+  };
 
   /**
    * Updates the tree view with the given prefix.
@@ -331,17 +342,20 @@ class TreeView {
    ************************************************************************************/
 
   clear() {
-    this.container.querySelectorAll(".tv-nav-marker").forEach((n) => {
-      n.onclick = undefined;
-    });
+    this.container
+      .querySelectorAll(".tv-nav-marker")
+      .forEach((n) =>
+        n.removeEventListener("click", this.handleNavMarkerClick),
+      );
 
     this.container.querySelectorAll(".tv-icon").forEach((n) => {
-      n.onclick = undefined;
-      n.onmousedown = undefined;
+      n.removeEventListener("mousedown", this.eventPreventDefault);
+      n.removeEventListener("click", this.handleNodeIconClick);
     });
 
     this.container.querySelectorAll(".tv-node-label").forEach((n) => {
-      n.onclick = undefined;
+      n.removeEventListener("mousedown", this.eventPreventDefault);
+      n.removeEventListener("click", this.handleNodeLabelClick);
     });
 
     this.container.innerHTML = "";
@@ -411,11 +425,9 @@ class TreeView {
         : this.navIcons.right
       : "";
 
-    navMarker.onclick = this.handleNavMarkerClick(node);
-
+    navMarker.addEventListener("click", this.handleNavMarkerClick);
     nodeContent.dataset.state0 = node.state[0];
     nodeContent.dataset.state1 = node.state[1];
-
     nodeContent.appendChild(navMarker);
 
     for (var s of [0, 1]) {
@@ -428,11 +440,9 @@ class TreeView {
       icon.className = className;
       icon.innerHTML = this.viewIcons[s][state];
       if (state !== States.disabled) {
-        icon.onmousedown = (e) => e.preventDefault();
-        icon.onclick = (e) => {
-          e.stopPropagation();
-          this.toggleIcon(node, s);
-        };
+        icon.dataset.sValue = s;
+        icon.addEventListener("mousedown", this.eventPreventDefault);
+        icon.addEventListener("click", this.handleNodeIconClick);
       }
       nodeContent.appendChild(icon);
     }
@@ -444,13 +454,8 @@ class TreeView {
     if (color != null) {
       label.innerHTML += `<span style="color:${color}"> ⚈</span>`;
     }
-    label.onmousedown = (e) => {
-      e.preventDefault();
-    };
-
-    label.onclick = (e) => {
-      this.handleLabelClick(node, e);
-    };
+    label.addEventListener("mousedown", this.eventPreventDefault);
+    label.addEventListener("click", this.handleNodeLabelClick);
 
     nodeContent.appendChild(label);
 
