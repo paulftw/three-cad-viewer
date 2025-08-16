@@ -916,9 +916,6 @@ class Viewer {
         }
       }
 
-      // dispose scene
-      deepDispose(this.scene);
-
       deepDispose(this.gridHelper);
 
       deepDispose(this.clipping);
@@ -934,6 +931,7 @@ class Viewer {
       deepDispose(this.controls);
 
       // dispose scene
+      deepDispose(this.scene);
       this.scene = null;
       this.ready = false;
     }
