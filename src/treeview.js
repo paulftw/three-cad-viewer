@@ -263,7 +263,6 @@ class TreeView {
     e.stopPropagation();
     const node = this.getNodeForElement(e.target);
     const s = parseInt(e.currentTarget.dataset.sValue);
-    console.log("node", node, s);
     this.toggleIcon(node, s);
   };
 
