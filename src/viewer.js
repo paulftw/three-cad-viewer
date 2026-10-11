@@ -2952,7 +2952,8 @@ class Viewer {
     }
 
     // Adapt camers to new dimensions
-    this.camera.changeDimensions(this.bb_radius, cadWidth, height);
+    // No camera before the first render(), which takes the size from cadWidth.
+    this.camera?.changeDimensions(this.bb_radius, cadWidth, height);
 
     // update the this
     this.update(true);
